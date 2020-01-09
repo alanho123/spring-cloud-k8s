@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <!--服務器ip獲取方法配置-->
+    <conversionRule conversionWord="ip" converterClass="hello.LogIpConfig" />
+
+    <include resource="default.xml" />
+
+</configuration>

@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-cm
+data:
+  config_service_address: http://config-0.config:9999
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: config-np
+  labels:
+    app: config
+spec:
+  type: NodePort
+  ports:
+    - port: 9999
+      nodePort: 30099
+      name: config
+  selector:
+    app: config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: config
+  labels:
+    app: config
+spec:
+  clusterIP: None
+  ports:
+    - port: 9999
+      name: config
+  selector:
+    app: config
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: config
+spec:
+  serviceName: 'config'
+  # n instances
+  replicas: 1
+  selector:
+    matchLabels:
+      app: config
+  template:
+    metadata:
+      labels:
+        app: config
+    spec:
+      containers:
+        - name: config-container
+          image: breezeacr.azurecr.io/config-server:v2
+          ports:
+            - containerPort: 9999
+          resources:
+            requests:
+              memory: "256Mi"
+            limits:
+              memory: "512Mi"
+          env:
+            - name: EUREKA_SERVER_ADDRESS
+              valueFrom:
+                configMapKeyRef:
+                  name: eureka-cm
+                  key: eureka_service_address

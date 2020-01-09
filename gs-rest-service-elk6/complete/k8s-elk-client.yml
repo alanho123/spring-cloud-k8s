@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: elk-client-np
+  labels:
+    app: elk-client
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8088
+      name: elk-client
+  selector:
+    app: elk-client
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elk-client
+  labels:
+    app: elk-client
+spec:
+  clusterIP: None
+  ports:
+    - port: 8088
+      name: elk-client
+  selector:
+    app: elk-client
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elk-client
+spec:
+  serviceName: 'elk-client'
+  # n instances
+  replicas: 2
+  selector:
+    matchLabels:
+      app: elk-client
+  template:
+    metadata:
+      labels:
+        app: elk-client
+    spec:
+      containers:
+        - name: elk-client-container
+          image: breezeacr.azurecr.io/elk-client:v3
+          ports:
+            - containerPort: 8088
+          resources:
+            requests:
+              memory: "128Mi"
+            limits:
+              memory: "256Mi"
+          env:
+            - name: EUREKA_SERVER_ADDRESS
+              valueFrom:
+                configMapKeyRef:
+                  name: eureka-cm
+                  key: eureka_service_address
+            - name: CONFIG_SERVER_ADDRESS
+              valueFrom:
+                configMapKeyRef:
+                  name: config-cm
+                  key: config_service_address

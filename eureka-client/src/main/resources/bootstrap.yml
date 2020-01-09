@@ -1,0 +1,12 @@
+spring:
+#  application:
+#    # 要跟github上的檔名一致
+#    name: vod-config
+  cloud:
+    config:
+      uri: ${CONFIG_SERVER_ADDRESS:http://localhost:9999}
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: '*'

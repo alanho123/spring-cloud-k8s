@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<included>
+
+    <!-- 將日誌打印到控制檯 -->
+    <appender name="PROJECT-CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern> %d{HH:mm:ss.SSS} %contextName [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 將日誌寫入到文件配置 -->
+    <appender name="PROJECT-FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/application.log</file>
+        <encoder >
+            <pattern>"host": "%ip" %d{HH:mm:ss.SSS} %-5level [%thread] %logger{32}[%file:%line] -&gt; %msg%n</pattern>
+            <charset class="java.nio.charset.Charset">UTF-8</charset>
+        </encoder>
+        <!--配置備份 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/application.log.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- logback 和 logstash 通訊配置 -->
+    <appender name="SOCKET" class="net.logstash.logback.appender.LogstashSocketAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <host>13.76.177.53</host>
+        <port>5000</port>
+    </appender>
+
+    <!-- logstash遠程日誌配置-->
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>13.76.177.53:5000</destination>
+        <!--輸出打印json格式-->
+        <encoder charset="UTF-8" class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <pattern>
+                    <pattern>
+                        <!--輸出日誌可自定義，可根據自己需要配置-->
+                        {
+                        <!--es索引名稱 -->
+                        "indexname":"app_logstash",
+                        <!--應用名稱 -->
+                        "appname":"vod-config",
+                        <!--打印時間 -->
+                        "timestamp": "%d{yyyy-MM-dd HH:mm:ss.SSS}",
+                        <!--線程名稱 -->
+                        "thread": "%thread",
+                        <!--日誌級別 -->
+                        "level": "%level",
+                        <!--日誌名稱 -->
+                        "logger_name": "%logger",
+                        <!--日誌信息 -->
+                        "message": "%msg",
+                        <!--日誌堆棧 -->
+                        "stack_trace": "%exception"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="PROJECT-FILE"/>
+        <appender-ref ref="PROJECT-CONSOLE"/>
+        <appender-ref ref="SOCKET"/>
+        <appender-ref ref="LOGSTASH"/>
+    </root>
+
+</included>

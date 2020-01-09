@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-admin-console
+  labels:
+    app: spring-admin
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8888
+  selector:
+    app: spring-admin
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: spring-admin
+spec:
+  serviceName: 'spring-admin'
+  # n instances
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-admin
+  template:
+    metadata:
+      labels:
+        app: spring-admin
+    spec:
+      containers:
+      - name: spring-admin-container
+        image: breezeacr.azurecr.io/spring-admin:v1
+        ports:
+        - containerPort: 8888
+        resources:
+          requests:
+            memory: "256Mi"
+          limits:
+            memory: "512Mi"
+        env:
+        - name: EUREKA_SERVER_ADDRESS
+          valueFrom:
+            configMapKeyRef:
+              name: eureka-cm
+              key: eureka_service_address
+
