@@ -92,6 +92,11 @@
 							<directory>${project.build.directory}</directory>
 							<include>${project.build.finalName}.jar</include>
 						</resource>
+						<resource>
+							<targetPath>/</targetPath>
+							<directory>pinpoint-agent</directory>
+							<include>pinpoint-bootstrap-1.8.5.jar</include>
+						</resource>
 					</resources>
 				</configuration>
 			</plugin>
